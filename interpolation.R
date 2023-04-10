@@ -1,6 +1,9 @@
 setwd('/home/pultsinak/Рабочий стол/pupil')
+library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(data.table)
+library(stringi)
 source('readEL.R')
 #library(dplyr)
 #library(tidyr)
@@ -103,7 +106,6 @@ for(subject_idx in 1){
   print(paste("Reading ",list_of_files[subject_idx],sep=""))
   fn <- paste(folder,list_of_files[subject_idx],sep="")
   response_logs <- NULL
-  
   D <- read.asc(fn) 
   D$raw[,is.na(colnames(D$raw))] <- NULL
   
@@ -159,7 +161,6 @@ for(subject_idx in 1){
     L <- length(D$raw$time)
     N <- D_temp$raw[1,]$time-D$raw[L,]$time-1
     time_finish <- D$raw[L,]$time
-    
     raw_filler <- data.frame(time=time_finish+(1:N_delay),
                              xp=rep(NA,N_delay),
                              yp=rep(NA,N_delay),
@@ -190,38 +191,11 @@ for(subject_idx in 1){
   D$raw <- as.data.table(D$raw[,1:5])
   D$msg <- as.data.table(D$msg)
   tau_const <- D$raw[1,]$time
-  responses <-D$msg$text
-  responses <- as.data.frame(responses)
-  responses$fname <- subject_name
-
-  for(block_idx in unique(responses$block)){
-    block_link <- responses$block==block_idx
-    responses_temp <- responses[block_link]
-    trained_bool <- F
-    last_trial <- length(responses_temp$time)
-    trial_idx <- 1
-    while(!trained_bool & trial_idx<last_trial-5){
-      V <- (trial_idx+4):last_trial
-      cor_percentage <- 1-mean(responses_temp[V]$risk)
-      if(prod(!responses_temp[trial_idx+(0:3)]$risk) & cor_percentage>0.65){
-        trained_bool <- T
-        responses_temp[1:(trial_idx-1)]$learning <- T
-        responses_temp[trial_idx+(0:3)]$critical <- T
-        responses_temp[V]$trained <- T
-        responses_temp[length(responses_temp$time)]$last_trial <- T
-      
-        responses[block_link] <- responses_temp
-    }
-    trial_idx <- trial_idx+1
-    }
   
-  }
 #this section is for eye movement interpolation
   BI <- blink_find(D$raw)
   print('Interpolating blinks')
-  responses$blink <- F
-  responses$blink_time <- -1
-  responses$blink_duration <- 0
+
   for(blink_idx in 1:length(BI$t1)) {
     row_idx1 <- BI[blink_idx,]$t1-tau_const-1
     row_idx2 <- BI[blink_idx,]$t2-tau_const+1
@@ -247,8 +221,7 @@ for(subject_idx in 1){
 
 }
 
-library(dplyr)
-library(tidyr)
+
 dt<- data.table()
 raw<- D$raw
 dt<-cbind(dt,raw[,4]$ps)
@@ -268,6 +241,6 @@ my_dt$text<- NULL
 setnames(my_dt, "txt",'text')
 
 setwd('/net/server/data/Archive/piansrann/pultsinak/pupil/asc/run_1_csv')
-write.csv(my_dt, "W998_run1.csv")
+write.csv(my_dt, "W987_run1.csv")
 
 
