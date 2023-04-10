@@ -10,12 +10,6 @@ source('readEL.R')
 
 
 
-
-logfile <- read.table("/Volumes/My Passport for Mac/pupil/W997_run1.log",sep='@')
-
-dat <- read.asc('/net/server/data/Archive/piansrann/pultsinak/pupil/asc/run_1/W995.asc')
-raw<- dat$raw
-
 #config
 t1 <- -2000 #starting epoch latency
 t2 <- 3000  #finish epoch latency
